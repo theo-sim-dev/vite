@@ -434,6 +434,10 @@ for (const path in modules) {
 }
 ```
 
+### Options
+
+#### `eager`
+
 Matched files are by default lazy-loaded via dynamic import and will be split into separate chunks during build. If you'd rather import all the modules directly (e.g. relying on side-effects in these modules to be applied first), you can pass `{ eager: true }` as the second argument:
 
 ```js twoslash
@@ -451,6 +455,35 @@ import * as __vite_glob_0_1 from './dir/foo.js'
 const modules = {
   './dir/bar.js': __vite_glob_0_0,
   './dir/foo.js': __vite_glob_0_1,
+}
+```
+
+#### `base`
+
+The `base` option allows you to specify a base directory, so the keys in the resulting object are relative to that directory. This makes it less error-prone to work with the imported modules, especially when iterating over keys or looking up specific files.
+
+```js twoslash
+import 'vite/client'
+// ---cut---
+const modules = import.meta.glob('*.js', { base: '/dir' })
+```
+
+The above will be transformed into the following:
+
+```js
+// code produced by vite
+const modules = {
+  'bar.js': () => import('/dir/bar.js'),
+  'foo.js': () => import('/dir/foo.js'),
+}
+```
+
+Now, if you want to get a specific module or iterate over slugs, you can use the keys directly without extra string manipulation:
+
+```js
+const bar = modules['bar.js']
+for (const slug in modules) {
+  // slug is 'bar.js', 'foo.js', etc.
 }
 ```
 
