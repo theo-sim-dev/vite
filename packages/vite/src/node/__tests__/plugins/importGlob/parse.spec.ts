@@ -232,6 +232,47 @@ describe('parse positives', async () => {
       ]
     `)
   })
+
+  it('options with base', async () => {
+    expect(
+      await run(`
+    import.meta.glob('*.ts', { base: './modules' })
+    `),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "globs": [
+            "*.ts",
+          ],
+          "options": {
+            "base": "./modules",
+          },
+          "start": 5,
+        },
+      ]
+    `)
+  })
+
+  it('options with base and other options', async () => {
+    expect(
+      await run(`
+    import.meta.glob('*.ts', { base: './modules', eager: true })
+    `),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "globs": [
+            "*.ts",
+          ],
+          "options": {
+            "base": "./modules",
+            "eager": true,
+          },
+          "start": 5,
+        },
+      ]
+    `)
+  })
 })
 
 describe('parse negatives', async () => {
@@ -372,6 +413,19 @@ describe('parse negatives', async () => {
       await runError(
         'import.meta.glob("./*.js", { query: { foo: 123, ...a } })',
       ),
+    ).toMatchInlineSnapshot(
+      '[Error: Vite is unable to parse the glob options as the value is not static]',
+    )
+  })
+
+  it('options base type', async () => {
+    expect(
+      await runError('import.meta.glob("./*.js", { base: 123 })'),
+    ).toMatchInlineSnapshot(
+      '[Error: Expected glob option "base" to be of type string, but got number]',
+    )
+    expect(
+      await runError('import.meta.glob("./*.js", { base: hey })'),
     ).toMatchInlineSnapshot(
       '[Error: Vite is unable to parse the glob options as the value is not static]',
     )
